@@ -1,15 +1,13 @@
 import { notFound } from "next/navigation"
 import ProductDetailView from "@/components/product-detail"
 import { getProduct, getProducts } from "@/lib/catalog"
-import { products as fallbackProducts } from "@/lib/products"
 
-export const revalidate = 60
+export const dynamic = "force-dynamic"
 
-// Static params come from the bundled catalogue so the routes exist even
-// before the database is seeded. Pages still resolve through the DB at render.
-export function generateStaticParams() {
-  return fallbackProducts.map((product) => ({ id: product.id }))
-}
+// Routed dynamically (see `dynamic` above) because the catalogue lives in
+// Postgres. `generateStaticParams` is intentionally omitted — mixing it with
+// force-dynamic prerendering is what caused the build to fail earlier.
+export const dynamicParams = true
 
 export async function generateMetadata({
   params,

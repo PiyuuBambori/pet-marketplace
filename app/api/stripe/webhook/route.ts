@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import Stripe from "stripe"
 import { prisma } from "@/lib/prisma"
-import { ORDER_FLOW } from "@/lib/orders"
+import { ORDER_FLOW } from "@/lib/accounts"
 
 export const dynamic = "force-dynamic"
 

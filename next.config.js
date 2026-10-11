@@ -4,9 +4,15 @@ const nextConfig = {
 
   images: {
     // `domains` is deprecated in Next 14 — use remotePatterns instead.
-    // All catalogue photography is served from /public, so no remote
-    // hosts are currently allowed. Add patterns here if you add S3/Cloudinary.
-    remotePatterns: [],
+    // Catalogue photography lives in the Supabase Storage bucket, so its
+    // project host must be allowed here. Local /public photos still work.
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "hgworwdthqjzmnpujkvd.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
+    ],
     formats: ["image/avif", "image/webp"],
   },
 

@@ -32,6 +32,20 @@ export type Address = {
   country: string
 }
 
+/** Mirrors a row of public."User" — credentials live in Supabase Auth. */
+export type Account = {
+  id: string
+  email: string
+  name: string | null
+  phone: string | null
+  avatar: string
+  role: Role
+  createdAt: number
+  addresses: Address[]
+}
+
+export type TimelineEntry = { status: string; at: string; note: string }
+
 export type Order = {
   id: string
   userId: string
@@ -47,60 +61,7 @@ export type Order = {
   address: Address
   paymentMethod: string
   trackingNumber: string | null
-  timeline: { status: OrderStatus; at: number; note: string }[]
-}
-
-export type Account = {
-  id: string
-  name: string
-  email: string
-  /** intentionally not persisted in plaintext-readable form for buyer accounts */
-  passwordHash: string
-  role: Role
-  avatar: string
-  phone: string
-  createdAt: number
-  addresses: Address[]
-}
-
-/** A design saved from the Seller Studio, stored locally for the admin. */
-export type SavedDesign = {
-  id: string
-  brand: string | null
-  title: string
-  description: string
-  imageUrl: string
-  category: string
-  garmentType: string
-  sizes: string[]
-  colors: string[]
-  price: number
-  mrp: number | null
-  createdAt: number
-}
-
-/** The single, permanent admin account. Cannot be deleted or demoted. */
-export const ADMIN_EMAIL = "admin@doom.shop"
-
-export const PERMANENT_ADMIN = {
-  id: "acc_admin_permanent",
-  name: "Studio Admin",
-  email: ADMIN_EMAIL,
-  passwordHash: "admin-doom-2024",
-  role: "admin" as Role,
-  avatar: "👑",
-  phone: "+91 90000 00000",
-  createdAt: 0,
-  addresses: [],
-}
-
-export const ADMIN_PASSWORD = "admin123"
-
-export function canLoginAsAdmin(email: string, password: string) {
-  return (
-    email.trim().toLowerCase() === ADMIN_EMAIL &&
-    password === ADMIN_PASSWORD
-  )
+  timeline: TimelineEntry[]
 }
 
 export const AVATARS = [
@@ -109,37 +70,29 @@ export const AVATARS = [
   "🌸", "🌈", "⭐", "🍓", "🧁", "🎀", "🎈", "🌻",
 ]
 
-export const orderFlow: {
-  status: OrderStatus
-  label: string
-  note: string
-}[] = [
+export const ORDER_FLOW = [
   { status: "placed", label: "Order Placed", note: "We received your order." },
   { status: "confirmed", label: "Confirmed", note: "Payment verified." },
   { status: "packed", label: "Packed", note: "Wrapped and ready to ship." },
   { status: "shipped", label: "Shipped", note: "On its way to you." },
-  {
-    status: "out_for_delivery",
-    label: "Out for Delivery",
-    note: "Arriving today.",
-  },
+  { status: "out_for_delivery", label: "Out for Delivery", note: "Arriving today." },
   { status: "delivered", label: "Delivered", note: "Enjoy the new outfit!" },
-]
+] as const
 
-export function statusIndex(status: OrderStatus) {
-  const i = orderFlow.findIndex((s) => s.status === status)
+export function statusIndex(status: string): number {
+  const i = ORDER_FLOW.findIndex((s) => s.status === status)
   return i === -1 ? 0 : i
 }
 
-export function statusLabel(status: OrderStatus) {
-  return orderFlow[statusIndex(status)].label
+export function statusLabel(status: string): string {
+  return ORDER_FLOW[statusIndex(status)].label
 }
 
 export function formatRupees(value: number) {
   return `₹${Math.round(value).toLocaleString("en-IN")}`
 }
 
-export function formatDate(ts: number) {
+export function formatDate(ts: number | string) {
   return new Date(ts).toLocaleDateString("en-IN", {
     day: "numeric",
     month: "short",
@@ -147,7 +100,7 @@ export function formatDate(ts: number) {
   })
 }
 
-export function formatDateTime(ts: number) {
+export function formatDateTime(ts: number | string) {
   return new Date(ts).toLocaleString("en-IN", {
     day: "numeric",
     month: "short",

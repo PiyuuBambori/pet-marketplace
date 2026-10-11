@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { getSessionUser } from "@/lib/auth"
+import { requireUser } from "@/lib/auth"
 
 export const dynamic = "force-dynamic"
 
@@ -19,7 +19,7 @@ type IncomingItem = {
 /** POST /api/orders — create an order for the signed-in profile */
 export async function POST(request: Request) {
   try {
-    const user = await getSessionUser()
+    const user = await requireUser().catch(() => null)
     if (!user) {
       return NextResponse.json({ error: "Sign in to place an order." }, { status: 401 })
     }

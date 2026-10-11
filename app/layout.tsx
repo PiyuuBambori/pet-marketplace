@@ -5,6 +5,7 @@ import { Footer } from "@/components/footer"
 import Header from "@/components/header"
 import { CartProvider } from "@/components/cart-provider"
 import { AccountProvider } from "@/components/account-provider"
+import { OrdersProvider } from "@/components/orders-provider"
 import "./globals.css"
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
@@ -44,11 +45,12 @@ export const metadata: Metadata = {
     description:
       "Dress your pet in style. Honest sizing, free shipping over ₹1,499, 30-day returns.",
   },
-  robots: {
-    index: true,
-    follow: true,
-  },
+  robots: { index: true, follow: true },
 }
+
+// NOTE: OrdersProvider reads auth state itself via useAccounts() rather than
+// taking it as props. Passing anything from this Server Component (including
+// function results) across the boundary is what broke prerendering earlier.
 
 export default function RootLayout({
   children,
@@ -65,15 +67,17 @@ export default function RootLayout({
           Skip to content
         </a>
         <AccountProvider>
-          <CartProvider>
-            <Suspense fallback={null}>
-              <Header />
-            </Suspense>
-            <main id="main" className="flex-1">
-              {children}
-            </main>
-            <Footer />
-          </CartProvider>
+          <OrdersProvider>
+            <CartProvider>
+              <Suspense fallback={null}>
+                <Header />
+              </Suspense>
+              <main id="main" className="flex-1">
+                {children}
+              </main>
+              <Footer />
+            </CartProvider>
+          </OrdersProvider>
         </AccountProvider>
       </body>
     </html>

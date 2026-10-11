@@ -5,10 +5,12 @@ import { useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { Check, Package, Truck } from "lucide-react"
 import { useAccounts } from "@/components/account-provider"
+import { useOrders } from "@/components/orders-provider"
 
 export default function SuccessView() {
   const params = useSearchParams()
-  const { user, myOrders, hydrated } = useAccounts()
+  const { user, hydrated } = useAccounts()
+  const { myOrders } = useOrders()
   const [orderId, setOrderId] = useState<string>("")
 
   useEffect(() => {

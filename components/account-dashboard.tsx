@@ -18,6 +18,7 @@ import {
 } from "lucide-react"
 import { useAccounts } from "@/components/account-provider"
 import OrderCard from "@/components/order-card"
+import { useOrders } from "@/components/orders-provider"
 import { AVATARS, formatDate, formatRupees, type Address } from "@/lib/accounts"
 
 type Tab = "overview" | "orders" | "addresses" | "settings"
@@ -36,13 +37,11 @@ export default function AccountDashboard() {
     isAdmin,
     hydrated,
     logout,
-    myOrders,
     updateProfile,
     addAddress,
     removeAddress,
-    advanceOrder,
-    cancelOrder,
   } = useAccounts()
+  const { myOrders, loading, advanceOrder, cancelOrder } = useOrders()
 
   const [tab, setTab] = useState<Tab>("overview")
 
@@ -249,9 +248,9 @@ export default function AccountDashboard() {
         {tab === "settings" && (
           <SettingsPanel
             isAdmin={isAdmin}
-            name={user.name}
+            name={user.name ?? ""}
             email={user.email}
-            phone={user.phone}
+            phone={user.phone ?? ""}
             avatar={user.avatar}
             onSave={updateProfile}
           />

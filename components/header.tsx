@@ -17,6 +17,7 @@ import {
   ChevronDown,
 } from "lucide-react"
 import { useAccounts } from "@/components/account-provider"
+import { useOrders } from "@/components/orders-provider"
 import { useCart } from "@/components/cart-provider"
 
 const navLinks = [
@@ -30,7 +31,8 @@ const navLinks = [
 export default function Header() {
   const router = useRouter()
   const pathname = usePathname()
-  const { user, isAdmin, logout, myOrders, orders } = useAccounts()
+  const { user, isAdmin, logout } = useAccounts()
+  const { orders } = useOrders()
   const { count } = useCart()
 
   const [query, setQuery] = useState("")
@@ -60,9 +62,9 @@ export default function Header() {
     setMenuOpen(false)
   }
 
-  const activeOrders = myOrders.filter(
-    (o) => o.status !== "delivered" && o.status !== "cancelled"
-  ).length
+const activeOrders = orders.filter(
+  (o) => o.status !== "delivered" && o.status !== "cancelled"
+).length
 
   const shipQueue = orders.filter(
     (o) =>
@@ -162,7 +164,7 @@ export default function Header() {
                       {user.avatar}
                     </span>
                     <span className="hidden text-[11px] font-bold uppercase leading-tight sm:block">
-                      {isAdmin ? "Admin" : user.name.split(" ")[0]}
+                      {isAdmin ? "Admin" : (user.name ?? "buyer").split(" ")[0]}
                     </span>
                     <ChevronDown size={14} />
                   </button>

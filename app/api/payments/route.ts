@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import Stripe from "stripe"
 import { prisma } from "@/lib/prisma"
-import { getSessionUser } from "@/lib/auth"
+import { requireUser } from "@/lib/auth"
 
 export const dynamic = "force-dynamic"
 
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const user = await getSessionUser()
+    const user = await requireUser().catch(() => null)
     if (!user) {
       return NextResponse.json({ error: "Sign in to check out." }, { status: 401 })
     }

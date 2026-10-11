@@ -5,12 +5,13 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Package, Search } from "lucide-react"
 import { useAccounts } from "@/components/account-provider"
+import { useOrders } from "@/components/orders-provider"
 import OrderCard from "@/components/order-card"
 
 export default function OrdersPage() {
   const router = useRouter()
-  const { user, isAdmin, hydrated, myOrders, advanceOrder, cancelOrder } =
-    useAccounts()
+  const { user, isAdmin, hydrated } = useAccounts()
+  const { myOrders, loading, advanceOrder, cancelOrder } = useOrders()
   const [query, setQuery] = useState("")
   const [filter, setFilter] = useState<"all" | "active" | "past">("all")
 
@@ -72,7 +73,7 @@ export default function OrdersPage() {
       <header className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <span className="tag border-pink-500 text-pink-600">
-            {user.avatar} {user.name.split(" ")[0]}
+            {user.avatar} {(user?.name ?? "buyer").split(" ")[0]}
           </span>
           <h1 className="mt-3 text-3xl uppercase sm:text-4xl">My orders</h1>
           <p className="mt-1.5 text-sm font-medium text-ink/60">

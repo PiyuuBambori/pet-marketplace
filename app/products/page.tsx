@@ -8,7 +8,7 @@ export const metadata = {
     "Browse dog and cat apparel. Filter by brand, size, colour and price.",
 }
 
-export const revalidate = 60
+export const dynamic = "force-dynamic"
 
 export default async function ProductsPage() {
   const { products } = await getProducts()

@@ -14,7 +14,7 @@ import {
 import {
   formatDate,
   formatRupees,
-  orderFlow,
+  ORDER_FLOW,
   statusIndex,
   type Order,
 } from "@/lib/accounts"
@@ -56,7 +56,7 @@ export default function OrderCard({
             <span
               className={`tag ${statusTone[order.status]}`}
             >
-              {orderFlow[current].label}
+              {ORDER_FLOW[current].label}
             </span>
           </div>
           <p className="mt-1 text-xs font-medium text-ink/55">
@@ -76,9 +76,9 @@ export default function OrderCard({
                   className="btn-white btn-sm"
                 >
                   <Sparkles size={13} />
-                  {orderFlow[current + 1]?.status === "shipped"
+                  {ORDER_FLOW[current + 1]?.status === "shipped"
                     ? "Ship order"
-                    : `Mark ${orderFlow[current + 1]?.label ?? "next"}`}
+                    : `Mark ${ORDER_FLOW[current + 1]?.label ?? "next"}`}
                 </button>
               )}
               {onCancel && (
@@ -155,12 +155,12 @@ export default function OrderCard({
               </div>
 
               <ol className="space-y-0">
-                {orderFlow.map((step, i) => {
+                {ORDER_FLOW.map((step, i) => {
                   const done = i <= current
                   const stamp = order.timeline.find(
                     (t) => t.status === step.status
                   )
-                  const isLast = i === orderFlow.length - 1
+                  const isLast = i === ORDER_FLOW.length - 1
 
                   return (
                     <li key={step.status} className="flex gap-3.5">

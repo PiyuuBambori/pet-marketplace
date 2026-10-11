@@ -7,32 +7,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+/// Application profile, keyed to the Supabase Auth user id.
+/// Credentials and sessions are owned by Supabase Auth (auth.users),
+/// so there is no password column here and no Session table.
 model User {
-  id        String   @id @default(cuid())
+  id        String   @id @db.Uuid // must match auth.users.id
   email     String   @unique
   name      String?
   phone     String?
   avatar    String   @default("🐾")
-  password  String? // bcrypt hash, never returned to the client
   role      String   @default("buyer") // "admin" | "buyer"
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  orders   Order[]
-  sessions Session[]
-}
-
-model Session {
-  id        String   @id @default(cuid())
-  token     String   @unique
-  userId    String
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([expiresAt])
+  orders Order[]
 }
 
 model Design {
@@ -67,7 +55,7 @@ model Design {
 
 model Order {
   id                String      @id @default(cuid())
-  userId            String
+  userId            String      @db.Uuid
   stripeSessionId   String?     @unique
   status            String      @default("placed")
   // placed | confirmed | packed | shipped | out_for_delivery | delivered | cancelled

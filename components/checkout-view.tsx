@@ -16,6 +16,7 @@ import {
 } from "lucide-react"
 import { useCart } from "@/components/cart-provider"
 import { useAccounts } from "@/components/account-provider"
+import { useOrders } from "@/components/orders-provider"
 import { formatPrice } from "@/lib/products"
 
 const SHIPPING_FEE = 79
@@ -31,7 +32,9 @@ const paymentMethods = [
 export default function CheckoutView() {
   const router = useRouter()
   const { lines, subtotal, savings, clear } = useCart()
-  const { user, hydrated, placeOrder } = useAccounts()
+  const { user, hydrated } = useAccounts()
+  const { refresh: refreshOrders } = useOrders()
+  const [statusMessage, setStatusMessage] = useState("")
 
   const [step, setStep] = useState<1 | 2>(1)
   const [payment, setPayment] = useState("Card")
@@ -55,7 +58,7 @@ export default function CheckoutView() {
     if (!user) return
     setAddress((current) => ({
       ...current,
-      fullName: current.fullName || user.name,
+      fullName: current.fullName || user.name || "",
       phone: current.phone || user.phone || "",
     }))
   }, [user])
@@ -75,6 +78,12 @@ export default function CheckoutView() {
       address.zip.trim()
   )
 
+  /**
+   * Orders are created server-side, which re-prices every line from the
+   * database so the client cannot dictate what is charged. If Stripe is
+   * configured we hand off to Checkout; otherwise the order is created
+   * directly so the flow still completes without payment keys.
+   */
   async function placeOrderNow() {
     if (!user) {
       router.push("/login")
@@ -82,53 +91,60 @@ export default function CheckoutView() {
     }
     setProcessing(true)
 
-    const order = placeOrder({
+    const payload = {
       items: lines.map((line) => ({
         productId: line.productId,
-        name: line.name,
-        brand: line.brand,
-        image: line.image,
-        price: line.price,
-        mrp: line.mrp,
         size: line.size,
         color: line.color,
         quantity: line.quantity,
       })),
-      subtotal,
-      shipping,
-      tax,
-      discount: savings + promoDiscount,
       address,
       paymentMethod: payment,
-    })
+    }
 
-    // try Stripe first; fall back to the local demo flow when unconfigured
+    // 1. Try Stripe Checkout (creates the order too, then redirects)
     try {
       const response = await fetch("/api/payments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items: lines.map((line) => ({
-            name: `${line.name} (${line.size} / ${line.color})`,
-            price: line.price,
-            quantity: line.quantity,
-          })),
-          customerEmail: user.email,
-          shippingAddress: address,
-        }),
+        body: JSON.stringify(payload),
       })
       const data = await response.json()
+
       if (response.ok && data.url) {
         window.location.href = data.url
         return
       }
+
+      if (response.status === 401) {
+        router.push("/login")
+        return
+      }
+
+      // Stripe not configured (503) or failed — fall through and create
+      // the order directly so the buyer still gets an order record.
+      if (response.status === 503) {
+        const orderRes = await fetch("/api/orders", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        })
+        if (orderRes.ok) {
+          const orderData = await orderRes.json()
+          clear()
+          await refreshOrders()
+          router.push(`/checkout/success?order=${orderData.order?.id ?? ""}`)
+          setProcessing(false)
+          return
+        }
+      }
     } catch {
-      /* Stripe unavailable — continue with the demo flow */
+      /* network failure — fall through */
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 900))
-    clear()
-    router.push(`/checkout/success?order=${order?.id ?? ""}`)
+    setStatusMessage(
+      "Payment could not be started. Please check your details and try again."
+    )
     setProcessing(false)
   }
 

@@ -13,11 +13,10 @@ import {
   Sparkles,
 } from "lucide-react"
 import { useAccounts } from "@/components/account-provider"
-import { ADMIN_EMAIL, ADMIN_PASSWORD } from "@/lib/accounts"
 
 export default function LoginPage() {
   const router = useRouter()
-  const { login, user, hydrated } = useAccounts()
+  const { login, user, hydrated, configured } = useAccounts()
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -29,25 +28,14 @@ export default function LoginPage() {
     if (hydrated && user) router.replace("/account")
   }, [hydrated, user, router])
 
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault()
     setError("")
     setBusy(true)
-
-    void (async () => {
-      // small delay so the button feedback reads as intentional
-      await new Promise((resolve) => setTimeout(resolve, 350))
-      const result = await login(email, password)
-      if (result.ok) router.push("/account")
-      else setError(result.error ?? "Could not sign in.")
-      setBusy(false)
-    })()
-  }
-
-  function fillAdmin() {
-    setEmail(ADMIN_EMAIL)
-    setPassword(ADMIN_PASSWORD)
-    setError("")
+    const result = await login(email, password)
+    if (result.ok) router.push("/account")
+    else setError(result.error ?? "Could not sign in.")
+    setBusy(false)
   }
 
   return (
@@ -63,6 +51,12 @@ export default function LoginPage() {
             </p>
           </div>
 
+          {!configured && (
+            <p className="mb-5 rounded-full border-2 border-ink bg-pink-100 px-4 py-2.5 text-sm font-bold">
+              Supabase is not configured, so sign-in is unavailable.
+            </p>
+          )}
+
           <form onSubmit={submit} className="space-y-5">
             <div>
               <label className="mb-1.5 block text-xs font-bold uppercase tracking-widest">
@@ -73,6 +67,7 @@ export default function LoginPage() {
                 <input
                   required
                   type="email"
+                  autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
@@ -90,6 +85,7 @@ export default function LoginPage() {
                 <input
                   required
                   type={show ? "text" : "password"}
+                  autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
@@ -112,7 +108,11 @@ export default function LoginPage() {
               </p>
             )}
 
-            <button type="submit" disabled={busy} className="btn-pink w-full">
+            <button
+              type="submit"
+              disabled={busy || !configured}
+              className="btn-pink w-full"
+            >
               {busy ? "Signing in…" : "Sign In"}
               {!busy && <ArrowRight size={16} />}
             </button>
@@ -134,7 +134,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* admin panel */}
+        {/* explainer */}
         <div className="flex flex-col gap-5">
           <div className="relative overflow-hidden rounded-sticker border-2 border-ink bg-pink-500 p-7 text-white shadow-sticker-lg">
             <div className="halftone halftone-light absolute inset-0 opacity-25" />
@@ -143,27 +143,19 @@ export default function LoginPage() {
                 <Sparkles size={12} /> Studio Access
               </span>
               <h2 className="mt-4 text-2xl uppercase leading-tight">
-                Permanent admin profile
+                One permanent admin profile
               </h2>
               <p className="mt-2 text-sm font-medium text-white/90">
-                One account, always available, can never be deleted. Use it to
-                post new products and manage the catalogue.
+                The studio account is managed in Supabase Auth and can never be
+                deleted. It is the only profile that can post products or manage
+                fulfilment.
               </p>
-
-              <dl className="mt-6 space-y-2.5 rounded-2xl border-2 border-ink bg-white/15 p-4 text-sm">
-                <div className="flex justify-between gap-4">
-                  <dt className="font-semibold text-white/70">Email</dt>
-                  <dd className="font-bold">{ADMIN_EMAIL}</dd>
-                </div>
-                <div className="flex justify-between gap-4">
-                  <dt className="font-semibold text-white/70">Password</dt>
-                  <dd className="font-bold">{ADMIN_PASSWORD}</dd>
-                </div>
-              </dl>
-
-              <button onClick={fillAdmin} className="btn-white mt-6 w-full">
-                Fill admin credentials
-              </button>
+              <p className="mt-4 rounded-xl border-2 border-ink bg-white/15 p-4 text-xs font-medium">
+                Its credentials are intentionally not shown here. If you need the
+                admin email or to reset the password, use the
+                <span className="font-bold"> npm run db:seed </span>
+                script or the Supabase dashboard.
+              </p>
             </div>
           </div>
 
@@ -179,7 +171,7 @@ export default function LoginPage() {
                 <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-pink-500" />
                 <span>
                   <strong className="text-ink">Admin</strong> — permanent, can
-                  post and edit products from the Seller Studio.
+                  post and edit listings and manage fulfilment.
                 </span>
               </li>
               <li className="flex gap-2.5">
@@ -187,14 +179,14 @@ export default function LoginPage() {
                 <span>
                   <strong className="text-ink">Buyer profiles</strong> — create
                   as many as you like. Each keeps its own order history and
-                  saved addresses.
+                  addresses.
                 </span>
               </li>
               <li className="flex gap-2.5">
                 <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-pink-200" />
                 <span>
-                  Everything is stored on this device, so profiles work offline
-                  with no database setup.
+                  Accounts live in Supabase, so orders follow you across devices
+                  and survive a cache clear.
                 </span>
               </li>
             </ul>

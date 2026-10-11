@@ -5,7 +5,9 @@ import HomeContent from "@/components/home-content"
 import ProductRail, { DealRail } from "@/components/product-rail"
 import { getProducts } from "@/lib/catalog"
 
-export const revalidate = 60
+// The catalogue is read from Postgres at request time. Forcing dynamic
+// rendering avoids prerendering pages whose data cannot be known at build.
+export const dynamic = "force-dynamic"
 
 export default async function Home() {
   const { products } = await getProducts()

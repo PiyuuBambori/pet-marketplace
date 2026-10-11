@@ -15,14 +15,22 @@ import {
   Check,
 } from "lucide-react"
 import { useAccounts } from "@/components/account-provider"
+import { useOrders } from "@/components/orders-provider"
+import type { HydratedOrder } from "@/components/orders-provider"
 import {
   formatDate,
   formatRupees,
-  orderFlow,
+  ORDER_FLOW,
   statusIndex,
   statusLabel,
   type Order,
 } from "@/lib/accounts"
+
+/**
+ * The admin API includes the buyer profile alongside each order. Reuse the
+ * provider's type so the two cannot drift apart.
+ */
+type AdminOrder = HydratedOrder
 
 const stageFilters = [
   { id: "todo", label: "To ship" },
@@ -35,8 +43,8 @@ type StageFilter = (typeof stageFilters)[number]["id"]
 
 export default function AdminOrders() {
   const router = useRouter()
-  const { user, isAdmin, hydrated, orders, accounts, advanceOrder, cancelOrder } =
-    useAccounts()
+  const { user, isAdmin, hydrated } = useAccounts()
+  const { orders, loading, advanceOrder, cancelOrder } = useOrders()
 
   const [filter, setFilter] = useState<StageFilter>("todo")
   const [query, setQuery] = useState("")
@@ -62,7 +70,7 @@ export default function AdminOrders() {
       return true
     })
     .filter((order) => {
-      const buyer = accounts.find((a) => a.id === order.userId)
+      const buyer = (order as AdminOrder).buyer
       const haystack = [
         order.id,
         buyer?.name,
@@ -240,16 +248,15 @@ function ShipmentCard({
   onAdvance,
   onCancel,
 }: {
-  order: Order
+  order: AdminOrder
   expanded: boolean
   onToggle: () => void
   onAdvance: (id: string) => void
   onCancel: (id: string) => void
 }) {
-  const { accounts } = useAccounts()
-  const buyer = accounts.find((a) => a.id === order.userId)
+    const buyer = order.buyer
   const stage = statusIndex(order.status)
-  const next = orderFlow[stage + 1]
+  const next = ORDER_FLOW[stage + 1]
   const isOpen = order.status === "placed" || order.status === "confirmed" || order.status === "packed"
   const units = order.items.reduce((n, i) => n + i.quantity, 0)
 
@@ -389,7 +396,7 @@ function ShipmentCard({
       {/* progress rail */}
       <div className="border-t-2 border-dashed border-ink/20 px-5 py-4">
         <div className="flex items-center gap-1">
-          {orderFlow.map((step, i) => {
+          {ORDER_FLOW.map((step, i) => {
             const done = i <= stage
             return (
               <div key={step.status} className="flex flex-1 items-center gap-1">
@@ -432,7 +439,7 @@ function ShipmentCard({
                 </span>
                 <div>
                   <p className="text-xs font-bold">
-                    {orderFlow.find((s) => s.status === entry.status)?.label ?? entry.status}
+                    {ORDER_FLOW.find((s) => s.status === entry.status)?.label ?? entry.status}
                   </p>
                   <p className="text-[11px] font-medium text-ink/55">
                     {formatDate(entry.at)} · {entry.note}

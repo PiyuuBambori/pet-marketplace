@@ -30,7 +30,6 @@ export default function RegisterPage() {
     setBusy(true)
 
     void (async () => {
-      await new Promise((resolve) => setTimeout(resolve, 350))
       const result = await registerBuyer({ name, email, password, avatar, phone })
       if (result.ok) router.push("/account")
       else setError(result.error ?? "Could not create your profile.")
