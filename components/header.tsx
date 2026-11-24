@@ -22,7 +22,7 @@ import { useCart } from "@/components/cart-provider"
 
 const navLinks = [
   { label: "Dogs", href: "/products?category=dog" },
-  { label: "Cats", href: "/products?category=cat" },
+  { label: "Dresses", href: "/products?q=dress" },
   { label: "New In", href: "/products?sort=new" },
   { label: "Sale", href: "/products?sort=discount" },
   { label: "Size Guide", href: "/size-guide" },
@@ -86,10 +86,10 @@ const activeOrders = orders.filter(
                   <span className="animate-wiggle">✦</span>
                   {[
                     "Free shipping over ₹1,499",
-                    "New in: festive edits",
+                    "New in: the debut collection",
                     "30-day easy returns",
-                    "Sizes XXS–4XL",
-                    "Designed by pet parents",
+                    "Sizes XXS–XL",
+                    "Made to order in India",
                     "Secure Stripe checkout",
                   ][i]}
                 </span>

@@ -12,14 +12,8 @@ export const dynamic = "force-dynamic"
 export default async function Home() {
   const { products } = await getProducts()
 
-  const trending = products.filter((p) => p.rating >= 4.6).slice(0, 10)
-  const dogPicks = products.filter((p) => p.category === "dog").slice(0, 10)
-  const catPicks = products.filter((p) => p.category === "cat").slice(0, 10)
-
-  // keep the rails populated even with a small catalogue
-  const trendingRail = trending.length >= 4 ? trending : products.slice(0, 10)
-  const dogRail = dogPicks.length >= 4 ? dogPicks : products.slice(0, 10)
-  const catRail = catPicks.length >= 4 ? catPicks : products.slice(0, 10)
+  const collectionRail = products.slice(0, 10)
+  const dogRail = products.filter((p) => p.category === "dog").slice(0, 10)
 
   return (
     <main>
@@ -27,36 +21,26 @@ export default async function Home() {
         <HeroCarousel />
       </Suspense>
 
-      <HomeContent />
+      <HomeContent products={products} />
 
       <DealRail products={products} />
 
       <div className="border-y-2 border-ink bg-pink-100">
         <ProductRail
-          title="Trending Now"
-          subtitle="Loved by pet parents this week"
-          href="/products?sort=rating"
-          items={trendingRail}
+          title="The Debut Collection"
+          subtitle="Five prints, made to order in sizes XXS–XL"
+          href="/products"
+          items={collectionRail}
           tone="tinted"
         />
       </div>
 
       <ProductRail
-        title="Dog Essentials"
-        subtitle="Built for walks, weather and zoomies"
+        title="Dog Dresses"
+        subtitle="Fitted bodice, sleeveless shape, a very good flared skirt"
         href="/products?category=dog"
         items={dogRail}
       />
-
-      <div className="border-y-2 border-ink bg-pink-100">
-        <ProductRail
-          title="Cat Style"
-          subtitle="Soft, light and completely unbothered"
-          href="/products?category=cat"
-          items={catRail}
-          tone="tinted"
-        />
-      </div>
 
       {/* editorial */}
       <section className="wrap py-14">
@@ -64,7 +48,7 @@ export default async function Home() {
           {[
             {
               title: "Measure once, order right",
-              body: "Our size chart uses neck, chest and length so your pet's fit is right the first time.",
+              body: "Our size chart uses back length, chest and neck so your dog's fit is right the first time.",
               href: "/size-guide",
               cta: "Open Size Guide",
             },

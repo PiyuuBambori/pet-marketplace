@@ -38,8 +38,10 @@ export default function ProductDetailView({
 }) {
   const { addItem, lines } = useCart()
 
+  const gallery = product.gallery.length ? product.gallery : [product.image]
   const [size, setSize] = useState<string>("")
-  const [color, setColor] = useState(product.colors[0].name)
+  const [color, setColor] = useState(product.colors[0]?.name ?? "Default")
+  const [activeImage, setActiveImage] = useState(gallery[0])
   const [qty, setQty] = useState(1)
   const [wishlisted, setWishlisted] = useState(false)
   const [sizeError, setSizeError] = useState(false)
@@ -99,31 +101,38 @@ export default function ProductDetailView({
           <div className="relative aspect-[4/5] overflow-hidden rounded-sticker border-2 border-ink bg-pink-100 shadow-sticker">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={product.image}
+              src={activeImage}
               alt={product.name}
               className="h-full w-full object-cover"
             />
             <span className="absolute left-4 top-4 -rotate-6 rounded-full border-2 border-ink bg-pink-500 px-3 py-1.5 text-xs font-bold uppercase text-white shadow-sticker-sm">
               {off}% off
             </span>
+            <span className="absolute right-4 top-4 rounded-full border-2 border-ink bg-white px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest shadow-sticker-sm">
+              {gallery.length}-view
+            </span>
           </div>
 
-          <div className="mt-4 flex gap-3">
-            <div className="relative h-20 w-16 overflow-hidden rounded-lg border-2 border-ink bg-pink-100">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={product.image}
-                alt={product.name}
-                className="h-full w-full object-cover"
-              />
-            </div>
-            {["Front", "Back", "Detail"].map((label) => (
-              <div
-                key={label}
-                className="flex h-20 w-16 items-center justify-center rounded-lg border-2 border-dashed border-ink/25 text-[9px] font-bold uppercase text-ink/40"
+          <div className="mt-4 flex gap-3 overflow-x-auto pb-1">
+            {gallery.map((image, index) => (
+              <button
+                key={image}
+                type="button"
+                onClick={() => setActiveImage(image)}
+                aria-label={`View photo ${index + 1}`}
+                className={`relative h-20 w-16 shrink-0 overflow-hidden rounded-lg border-2 bg-pink-100 transition-all ${
+                  activeImage === image
+                    ? "border-pink-500 shadow-sticker-pink-sm"
+                    : "border-ink/25 hover:border-ink"
+                }`}
               >
-                {label}
-              </div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={image}
+                  alt={`${product.name} view ${index + 1}`}
+                  className="h-full w-full object-cover"
+                />
+              </button>
             ))}
           </div>
 
@@ -172,13 +181,21 @@ export default function ProductDetailView({
           <h1 className="mt-1.5 text-2xl uppercase leading-tight">{product.name}</h1>
 
           <div className="mt-3 flex items-center gap-2.5">
-            <span className="rating-pill">
-              {product.rating}
-              <Star size={11} fill="currentColor" />
-            </span>
-            <span className="text-xs font-semibold text-ink/50">
-              {product.ratingCount.toLocaleString("en-IN")} ratings
-            </span>
+            {product.ratingCount > 0 ? (
+              <>
+                <span className="rating-pill">
+                  {product.rating}
+                  <Star size={11} fill="currentColor" />
+                </span>
+                <span className="text-xs font-semibold text-ink/50">
+                  {product.ratingCount.toLocaleString("en-IN")} ratings
+                </span>
+              </>
+            ) : (
+              <span className="tag border-pink-500 bg-pink-500 text-white">
+                New arrival
+              </span>
+            )}
           </div>
 
           <div className="mt-4 flex flex-wrap items-baseline gap-3">

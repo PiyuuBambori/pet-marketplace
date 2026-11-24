@@ -35,7 +35,7 @@ export default function SizeChart({
         <table className="w-full min-w-[420px] border-collapse text-sm">
           <thead>
             <tr className="bg-pink-500 text-white">
-              {["Size", "Neck", "Chest", "Length"].map((head) => (
+              {["Size", "Back", "Chest", "Neck"].map((head) => (
                 <th
                   key={head}
                   className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-widest"
@@ -69,9 +69,9 @@ export default function SizeChart({
                       </span>
                     )}
                   </td>
+                  <td className="px-4 py-2.5 font-medium">{row.length}&quot;</td>
+                  <td className="px-4 py-2.5 font-medium">{row.chest}&quot;</td>
                   <td className="px-4 py-2.5 font-medium">{row.neck}&quot;</td>
-                  <td className="px-4 py-2.5 font-medium">{row.chest}"</td>
-                  <td className="px-4 py-2.5 font-medium">{row.length}</td>
                 </tr>
               )
             })}
@@ -96,12 +96,12 @@ export default function SizeChart({
           </summary>
           <div className="space-y-3 border-t-2 border-dashed border-ink/20 px-4 py-4">
             {[
-              ["Neck", "Measure around the base of your dog's neck."],
-              ["Chest", "Measure around the widest part of your dog's chest."],
               [
-                "Length",
+                "Back length",
                 "Measure from the base of the neck to the base of the tail.",
               ],
+              ["Chest", "Measure around the widest part of your dog's chest."],
+              ["Neck", "Measure around the base of your dog's neck."],
             ].map(([label, detail]) => (
               <div key={label}>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-pink-600">

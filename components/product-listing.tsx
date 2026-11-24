@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { ChevronDown, SlidersHorizontal, X, Search } from "lucide-react"
 import ProductCard from "@/components/product-card"
-import { type Product } from "@/lib/products"
+import { discount, type Product } from "@/lib/products"
 
 const sizeOrder = [
   "XXS", "XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "One Size",
@@ -75,7 +75,7 @@ export default function ProductListing({ products }: { products: Product[] }) {
       if (sizeSet.size && !p.sizes.some((s) => sizeSet.has(s))) return false
       if (colorSet.size && !p.colors.some((c) => colorSet.has(c.name)))
         return false
-      if (discountOnly && p.mrp - p.price < 500) return false
+      if (discountOnly && discount(p.price, p.mrp) < 30) return false
       if (p.price > maxPrice) return false
       return true
     })
@@ -95,7 +95,9 @@ export default function ProductListing({ products }: { products: Product[] }) {
         list.sort((a, b) => b.rating - a.rating)
         break
       case "new":
-        list.sort((a, b) => Number(b.id) - Number(a.id))
+        list.sort((a, b) =>
+          b.id.localeCompare(a.id, undefined, { numeric: true })
+        )
         break
     }
     return list
@@ -244,7 +246,7 @@ export default function ProductListing({ products }: { products: Product[] }) {
             onChange={(e) => setDiscountOnly(e.target.checked)}
             className="h-4 w-4 accent-[#ff2e88]"
           />
-          40% and above
+          30% and above
         </label>
       </section>
 

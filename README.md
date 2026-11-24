@@ -1,7 +1,8 @@
-# Doom — Pet Clothes Marketplace
+# Doom — Dog Dress Store
 
-An open-source marketplace for dog and cat apparel. Built with Next.js 14 (App
-Router), TypeScript, Tailwind CSS, Supabase (Auth, Postgres, Storage) and Stripe.
+The DOOM debut collection: five made-to-order dog dresses. Built with Next.js 14
+(App Router), TypeScript, Tailwind CSS, Supabase (Auth, Postgres, Storage) and
+Stripe.
 
 ---
 
@@ -11,8 +12,8 @@ Router), TypeScript, Tailwind CSS, Supabase (Auth, Postgres, Storage) and Stripe
 |---|---|---|
 | Home | `/` | Hero carousel, category tiles, rails, deal section |
 | Catalogue | `/products` | Filter by pet type, brand, size, colour, price, discount |
-| Product detail | `/products/[id]` | Gallery, size chart (clickable rows), add to bag |
-| Size guide | `/size-guide` | Dog XXS–4XL and cat S–XL charts, how to measure |
+| Product detail | `/products/[id]` | Four-view gallery, size chart (clickable rows), add to bag |
+| Size guide | `/size-guide` | DOOM dog chart XXS–XL with breed guidance, how to measure |
 | Bag | `/cart` | Quantity controls, free-shipping progress bar |
 | Checkout | `/checkout` | Two-step address + payment, requires a profile |
 | Sign in / register | `/login`, `/register` | Supabase Auth, profiles with avatar picker |
@@ -49,8 +50,28 @@ Open <http://localhost:3000>.
      revokes `anon` / `authenticated` grants on them.
 3. Create a **public** Storage bucket named `doom-images` (5 MB file limit,
    image MIME types only). `npm run db:seed` fills it with the photography.
-4. Run `npm run db:seed`. It uploads every image, creates the 10 catalogue
-   designs and upserts the admin profile.
+   The seed also creates the bucket automatically if it is missing.
+4. Run `npm run db:seed`. It uploads the catalogue photography, creates the five
+   DOOM designs (`DOOM-001` to `DOOM-005`) and upserts the admin profile.
+
+### Catalogue import
+
+The live catalogue is taken from `DOOM_Product_Catalogue.xlsx`:
+
+| SKU | Design | Print |
+|---|---|---|
+| `DOOM-001` | Paw print Club | Green animal print |
+| `DOOM-002` | Cherry Bandit | Red bandana paisley |
+| `DOOM-003` | Foxy Lady | Pink fox print |
+| `DOOM-004` | Sunny Side Up | Yellow check |
+| `DOOM-005` | Dotty About You | Grey & yellow polka dot |
+
+`lib/products.ts` holds the same data so the storefront still works when
+Postgres is unreachable. `npm run db:seed` is idempotent: it upserts by SKU,
+removes leftover demo listings that have never been ordered, and hides any old
+listing that has order history. Prices in the workbook were marked “ADD”, so the
+seed uses ₹1,299 / ₹1,999 as editable launch placeholders — change them in
+**Admin → Catalogue**.
 
 > Row level security is deliberately locked down: the browser never talks to
 > the tables directly. Every read and write goes through a route handler that
@@ -138,7 +159,7 @@ whether an address is registered at signup.
 | `npm run db:generate` | Regenerate the Prisma client |
 | `npm run db:push` | Sync the schema to the database |
 | `npm run db:migrate` | Create and apply a migration |
-| `npm run db:seed` | Seed demo designs and the admin account |
+| `npm run db:seed` | Upload catalogue photos, sync the five designs and seed the admin |
 | `npm run db:studio` | Browse data in Prisma Studio |
 
 ---
@@ -208,8 +229,10 @@ public/photos/      bundled photography fallback
   keeps working.
 - Saved addresses live in browser state only; orders persist the address
   snapshot they were placed with, so history is never lost.
-- Photo credits: imagery in `public/photos/` comes from Openverse/Flickr under
-  open licences. Verify each licence before commercial use.
+- Fabric composition and care instructions still need confirming with the
+  supplier; the catalogue workbook marks both as “CONFIRM”.
+- Catalogue photography comes from `DOOM_Product_Catalogue.xlsx`. Confirm the
+  usage rights before a commercial launch.
 
 ## Licence
 

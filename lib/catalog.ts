@@ -70,7 +70,7 @@ export async function getProducts(): Promise<{
   try {
     const rows = await prisma.design.findMany({
       where: { isActive: true },
-      orderBy: { createdAt: "asc" },
+      orderBy: { id: "asc" },
     })
 
     if (rows.length === 0) {

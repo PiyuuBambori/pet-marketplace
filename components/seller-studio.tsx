@@ -282,7 +282,7 @@ export default function SellerStudio() {
                   required
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Cozy Fleece-Lined Dog Hoodie"
+                  placeholder="Paw print Club"
                   className="w-full rounded-full border-2 border-ink bg-pink-50 px-4 py-3 text-sm font-medium focus:border-pink-500 focus:outline-none"
                 />
               </div>

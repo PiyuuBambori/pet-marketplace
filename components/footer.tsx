@@ -6,7 +6,7 @@ const columns = [
     title: "Shop",
     links: [
       { label: "Dog Apparel", href: "/products?category=dog" },
-      { label: "Cat Apparel", href: "/products?category=cat" },
+      { label: "Dog Dresses", href: "/products?q=dress" },
       { label: "New Arrivals", href: "/products?sort=new" },
       { label: "Sale", href: "/products?sort=discount" },
       { label: "Size Guide", href: "/size-guide" },

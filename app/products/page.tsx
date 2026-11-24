@@ -3,9 +3,9 @@ import ProductListing from "@/components/product-listing"
 import { getProducts } from "@/lib/catalog"
 
 export const metadata = {
-  title: "Shop Pet Clothes",
+  title: "Shop DOOM Dog Dresses",
   description:
-    "Browse dog and cat apparel. Filter by brand, size, colour and price.",
+    "Browse the DOOM debut collection of dog dresses. Filter by size, print and price.",
 }
 
 export const dynamic = "force-dynamic"

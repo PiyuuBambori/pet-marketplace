@@ -1,31 +1,33 @@
 import Link from "next/link"
 import { Megaphone } from "lucide-react"
-import { products } from "@/lib/products"
+import { type Product } from "@/lib/products"
 
-const tiles = [
-  { label: "Dog Hoodies", sub: "Up to 50% off", href: "/products?q=hoodie", image: "/photos/dog-hoodie.jpg", span: "col-span-2 lg:col-span-1" },
-  { label: "Cat Sweaters", sub: "Soft knits", href: "/products?category=cat", image: "/photos/cat-sweater.jpg", span: "col-span-2 lg:col-span-1" },
-  { label: "Raincoats", sub: "Monsoon ready", href: "/products?q=raincoat", image: "/photos/dog-raincoat.jpg", span: "" },
-  { label: "Bandanas", sub: "From ₹399", href: "/products?q=bandana", image: "/photos/dog-bandana.jpg", span: "" },
-  { label: "Winter Coats", sub: "Thermal lined", href: "/products?q=coat", image: "/photos/dog-winter-coat.jpg", span: "" },
-  { label: "Jackets", sub: "Layer up", href: "/products?q=jacket", image: "/photos/dog-jacket.jpg", span: "" },
-  { label: "Cat Bandanas", sub: "Slim neck fit", href: "/products?category=cat", image: "/photos/cat-bandana.jpg", span: "" },
-  { label: "Accessories", sub: "Hats & ties", href: "/products?q=hat", image: "/photos/dog-hat.jpg", span: "" },
-  { label: "Occasion", sub: "Festive & formal", href: "/products?q=festive", image: "/photos/dog-festive-sweater.jpg", span: "" },
+const values = [
+  "Made to order",
+  "Sizes XXS–XL",
+  "Handmade in India",
+  "Small-batch prints",
 ]
 
-const brands = Array.from(new Set(products.map((p) => p.brand)))
+export default function HomeContent({ products }: { products: Product[] }) {
+  const tiles = products.slice(0, 5).map((product) => ({
+    label: product.name,
+    sub: `${product.colors[0]?.name ?? "Print"} · ${product.sizes[0]}–${
+      product.sizes[product.sizes.length - 1]
+    }`,
+    href: `/products/${product.id}`,
+    image: product.image,
+  }))
 
-export default function HomeContent() {
   return (
     <>
-      {/* category tiles */}
+      {/* collection tiles */}
       <section className="wrap py-12">
         <div className="mb-8 flex items-end justify-between">
           <div>
-            <h2 className="text-3xl sm:text-4xl">Shop by Category</h2>
+            <h2 className="text-3xl sm:text-4xl">Shop the Collection</h2>
             <p className="mt-2 text-sm font-medium text-ink/60">
-              Everything your pet needs to look their best.
+              Five prints. One very good dog dress.
             </p>
           </div>
           <Link
@@ -41,7 +43,7 @@ export default function HomeContent() {
             <Link
               key={tile.label}
               href={tile.href}
-              className={`group relative overflow-hidden rounded-sticker border-2 border-ink shadow-sticker transition-all hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-none ${tile.span}`}
+              className="group relative overflow-hidden rounded-sticker border-2 border-ink shadow-sticker transition-all hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-none"
             >
               <div className="relative aspect-[4/5] w-full overflow-hidden bg-pink-100">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -75,42 +77,36 @@ export default function HomeContent() {
             <div className="max-w-xl">
               <span className="inline-flex items-center gap-2 rounded-full border-2 border-ink bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-widest">
                 <Megaphone size={13} className="text-pink-500" />
-                Limited time
+                The debut drop
               </span>
               <h2 className="mt-4 text-3xl uppercase leading-tight text-white sm:text-4xl">
-                Extra 10% off your first order
+                Dress-up, sorted
               </h2>
               <p className="mt-3 text-sm font-medium text-white/90">
-                Use code{" "}
-                <span className="rounded-full border-2 border-ink bg-white px-3 py-1 font-bold text-pink-600">
-                  PAWFIRST10
-                </span>{" "}
-                at checkout. Applies to orders above ₹999.
+                The first DOOM collection is here: green animal print, red
+                bandana paisley, pink foxes, sunny checks and yellow polka dots.
               </p>
             </div>
-            <Link
-              href="/products"
-              className="btn-white shrink-0"
-            >
-              Start Shopping
+            <Link href="/products" className="btn-white shrink-0">
+              Shop all five
             </Link>
           </div>
         </div>
       </section>
 
-      {/* brand strip */}
+      {/* value strip */}
       <section className="border-y-2 border-ink bg-pink-100 py-7">
         <div className="wrap">
           <p className="mb-5 text-center text-[10px] font-bold uppercase tracking-[0.3em] text-ink/50">
-            Brands that dress well
+            The DOOM debut collection
           </p>
           <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
-            {brands.map((brand) => (
+            {values.map((value) => (
               <span
-                key={brand}
+                key={value}
                 className="font-display text-lg uppercase tracking-tight text-ink/25 transition-colors hover:text-pink-500"
               >
-                {brand}
+                {value}
               </span>
             ))}
           </div>

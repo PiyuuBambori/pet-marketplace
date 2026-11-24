@@ -6,24 +6,25 @@ import { ChevronLeft, ChevronRight } from "lucide-react"
 
 const slides = [
   {
-    src: "/photos/banner-winter.jpg",
-    alt: "Golden retriever in winter, up to 60% off warm coats",
-    href: "/products?q=coat",
-    eyebrow: "End of Season Sale",
-    title: "Winter Warmth",
-    accent: "Up to 60% off",
-    blurb: "Fleece-lined, weather-ready, sized to fit.",
-    cta: "Shop coats",
+    src: "/photos/doom-hero-festive.jpg",
+    alt: "Five dogs wearing the DOOM debut collection",
+    href: "/products",
+    eyebrow: "The Debut Collection",
+    title: "Five Prints,",
+    accent: "One Good Dog",
+    blurb:
+      "Green animal print, red bandana paisley, pink foxes, sunny checks and polka dots.",
+    cta: "Shop the collection",
   },
   {
-    src: "/photos/banner-cats.jpg",
-    alt: "Cat in soft knitwear, new season arrivals",
-    href: "/products?category=cat",
-    eyebrow: "New In For Cats",
-    title: "Fresh Fits for",
-    accent: "Cats & Kittens",
-    blurb: "Soft knits, light dresses, zero fuss.",
-    cta: "Shop cats",
+    src: "/photos/doom-hero-collection.jpg",
+    alt: "The five DOOM dog dresses photographed front-on",
+    href: "/products?q=dress",
+    eyebrow: "Made To Order",
+    title: "Dress Up,",
+    accent: "Show Off",
+    blurb: "Fitted bodices, flared skirts and sizes XXS to XL.",
+    cta: "Find the fit",
   },
 ]
 

@@ -13,37 +13,36 @@ const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Doom | Pet Clothes Marketplace",
+    default: "Doom | Dog Dresses, Made to Order",
     template: "%s | Doom",
   },
   description:
-    "Shop hoodies, sweaters, raincoats and accessories for dogs and cats. Honest sizing, free shipping over ₹1,499, 30-day returns.",
+    "Shop the DOOM debut collection: five dog dresses in sizes XXS–XL. Fitted bodices, flared skirts, honest sizing and 30-day returns.",
   applicationName: "Doom",
   keywords: [
+    "dog dresses",
     "dog clothes",
-    "cat clothes",
     "pet apparel",
-    "dog hoodie",
-    "cat sweater",
-    "pet raincoat",
-    "pet bandana",
+    "dog dress India",
+    "made to order dog clothes",
     "dog size chart",
+    "dog birthday outfit",
   ],
   icons: { icon: "/favicon.svg" },
   openGraph: {
     type: "website",
     url: siteUrl,
     siteName: "Doom",
-    title: "Doom | Pet Clothes Marketplace",
+    title: "Doom | Dog Dresses, Made to Order",
     description:
-      "Dress your pet in style. Honest sizing, free shipping over ₹1,499, 30-day returns.",
+      "Five dog dresses. Fitted bodices, flared skirts, sizes XXS–XL. Made to order in India.",
     locale: "en_IN",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Doom | Pet Clothes Marketplace",
+    title: "Doom | Dog Dresses, Made to Order",
     description:
-      "Dress your pet in style. Honest sizing, free shipping over ₹1,499, 30-day returns.",
+      "Five dog dresses. Fitted bodices, flared skirts, sizes XXS–XL. Made to order in India.",
   },
   robots: { index: true, follow: true },
 }

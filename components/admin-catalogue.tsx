@@ -337,7 +337,7 @@ export default function AdminCatalogue() {
               <input
                 value={form.imageUrl}
                 onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
-                placeholder="/photos/dog-hoodie.jpg"
+                placeholder="/photos/doom-001-paw-print-club.jpg"
                 className="w-full rounded-full border-2 border-ink bg-pink-50 px-4 py-3 text-sm font-medium focus:border-pink-500 focus:outline-none"
               />
             </div>

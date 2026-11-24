@@ -1,11 +1,33 @@
 import { config } from "dotenv"
 import { PrismaClient } from "@prisma/client"
-import { products } from "../lib/products"
+import { dogSizeChart, products } from "../lib/products"
 
 config({ path: ".env" })
 const prisma = new PrismaClient()
 
-/** Buckets the catalogue photos into Supabase Storage public URLs. */
+const BUCKET = "doom-images"
+const ALLOWED_MIMES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/avif",
+  "image/gif",
+]
+
+const MIME_BY_EXT: Record<string, string> = {
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".png": "image/png",
+  ".webp": "image/webp",
+  ".avif": "image/avif",
+  ".gif": "image/gif",
+}
+
+/**
+ * Uploads only the photos referenced by the catalogue to Supabase Storage and
+ * returns a local-path → public-URL map. Unlike the old version this does not
+ * push every leftover demo photo in public/photos.
+ */
 async function uploadCataloguePhotos(): Promise<Map<string, string>> {
   const urlMap = new Map<string, string>()
 
@@ -21,66 +43,80 @@ async function uploadCataloguePhotos(): Promise<Map<string, string>> {
     auth: { autoRefreshToken: false, persistSession: false },
   })
 
-  const bucket = "doom-images"
+  // Make the seed runnable on a fresh project too.
+  const { error: bucketError } = await admin.storage.getBucket(BUCKET)
+  if (bucketError) {
+    const { error } = await admin.storage.createBucket(BUCKET, {
+      public: true,
+      fileSizeLimit: 5 * 1024 * 1024,
+      allowedMimeTypes: ALLOWED_MIMES,
+    })
+    if (error) {
+      console.warn(`[storage] could not create ${BUCKET}: ${error.message}`)
+      return urlMap
+    }
+    console.log(`[storage] created bucket ${BUCKET}`)
+  }
+
   const fs = await import("fs/promises")
   const path = await import("path")
 
-  const dir = path.join(process.cwd(), "public", "photos")
-  let files: string[] = []
-  try {
-    files = await fs.readdir(dir)
-  } catch {
-    console.warn("[storage] public/photos not found, skipping")
-    return urlMap
+  const localPaths = new Set<string>()
+  for (const product of products) {
+    localPaths.add(product.image)
+    for (const image of product.gallery) localPaths.add(image)
   }
 
-  const mimeByExt: Record<string, string> = {
-    ".jpg": "image/jpeg",
-    ".jpeg": "image/jpeg",
-    ".png": "image/png",
-    ".webp": "image/webp",
-    ".svg": "image/svg+xml",
-  }
+  for (const localPath of Array.from(localPaths)) {
+    const ext = path.extname(localPath).toLowerCase()
+    const contentType = MIME_BY_EXT[ext]
+    if (!contentType) {
+      console.warn(`[storage] unsupported file type: ${localPath}`)
+      continue
+    }
 
-  for (const file of files) {
-    const ext = path.extname(file).toLowerCase()
-    const contentType = mimeByExt[ext]
-    if (!contentType) continue
+    const file = path.join(process.cwd(), "public", localPath.replace(/^\//, ""))
+    let buffer: Buffer
+    try {
+      buffer = await fs.readFile(file)
+    } catch {
+      console.warn(`[storage] missing local file: ${localPath}`)
+      continue
+    }
 
-    const buffer = await fs.readFile(path.join(dir, file))
-    const key = `catalogue/${file}`
-
-    // The bucket restricts MIME types, so it must be declared explicitly —
-    // a bare Buffer is detected as text/plain and rejected.
-    const { error } = await admin.storage.from(bucket).upload(key, buffer, {
+    const key = `catalogue/${path.basename(localPath)}`
+    const { error } = await admin.storage.from(BUCKET).upload(key, buffer, {
       contentType,
       cacheControl: "31536000",
       upsert: true,
     })
 
     if (error) {
-      console.warn(`[storage] ${file}: ${error.message}`)
+      console.warn(`[storage] ${localPath}: ${error.message}`)
       continue
     }
 
-    const { data } = admin.storage.from(bucket).getPublicUrl(key)
-    urlMap.set(`/photos/${file}`, data.publicUrl)
-    console.log(`[storage] uploaded ${key}`)
+    const { data } = admin.storage.from(BUCKET).getPublicUrl(key)
+    urlMap.set(localPath, data.publicUrl)
   }
 
+  console.log(`[storage] uploaded ${urlMap.size} catalogue images`)
   return urlMap
 }
 
 async function seedDesigns(imageUrls: Map<string, string>) {
   for (const product of products) {
     const imageUrl = imageUrls.get(product.image) ?? product.image
+    const gallery = product.gallery.length
+      ? product.gallery.map((image) => imageUrls.get(image) ?? image)
+      : [imageUrl]
 
     const data = {
       brand: product.brand,
       title: product.name,
       description: product.description,
       imageUrl,
-      gallery: [imageUrl],
+      gallery,
       category: product.category,
       garmentType: product.garment,
       sizes: product.sizes,
@@ -90,21 +126,51 @@ async function seedDesigns(imageUrls: Map<string, string>) {
       fabric: product.fabric,
       care: product.care,
       highlights: product.highlights,
+      measurements: { sizeChart: dogSizeChart },
       rating: product.rating,
       ratingCount: product.ratingCount,
       isActive: true,
     }
 
-    const existing = await prisma.design.findFirst({
-      where: { title: product.name },
+    // The SKU is the primary key, so re-running the seed updates the same row
+    // instead of creating duplicates.
+    await prisma.design.upsert({
+      where: { id: product.id },
+      update: data,
+      create: { id: product.id, ...data },
     })
-
-    if (existing) {
-      await prisma.design.update({ where: { id: existing.id }, data })
-    } else {
-      await prisma.design.create({ data })
-    }
+    console.log(`[catalogue] ${product.id} — ${product.name}`)
   }
+
+  // Remove only the ten old demo listings by title. Anything a seller created
+  // later is left untouched. Designs that have already been sold are hidden
+  // instead of deleted so order history survives.
+  const LEGACY_DEMO_TITLES = [
+    "Cozy Fleece-Lined Dog Hoodie",
+    "Merino Blend Cat Sweater",
+    "Hi-Vis Waterproof Raincoat",
+    "Everyday Cotton Bandana",
+    "Thermal Winter Coat",
+    "Cotton Cat Bandana",
+    "Quilted Dog Jacket",
+    "Occasion Pet Hat",
+    "Velvet Tuxedo & Bow Tie",
+    "Festive Fair Isle Sweater",
+  ]
+
+  const removed = await prisma.design.deleteMany({
+    where: {
+      title: { in: LEGACY_DEMO_TITLES },
+      orderItems: { none: {} },
+    },
+  })
+  const hidden = await prisma.design.updateMany({
+    where: { title: { in: LEGACY_DEMO_TITLES } },
+    data: { isActive: false },
+  })
+  console.log(
+    `[catalogue] cleaned up ${removed.count} demo listing(s), hid ${hidden.count} with order history`
+  )
 }
 
 /**
@@ -174,9 +240,9 @@ async function main() {
   await seedDesigns(imageUrls)
   await seedAdmin()
 
-  const count = await prisma.design.count()
+  const count = await prisma.design.count({ where: { isActive: true } })
   const users = await prisma.user.count()
-  console.log(`Seeded ${count} designs, ${users} profiles.`)
+  console.log(`Seeded ${count} live designs, ${users} profiles.`)
 }
 
 main()

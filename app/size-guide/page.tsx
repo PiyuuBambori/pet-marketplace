@@ -1,15 +1,10 @@
 import Link from "next/link"
-import {
-  CatSizeChart,
-  DogSizeChart,
-  MeasureGuide,
-  SizeTips,
-} from "@/components/size-guide"
+import { DogSizeChart, MeasureGuide, SizeTips } from "@/components/size-guide"
 
 export const metadata = {
   title: "Size Guide | Doom",
   description:
-    "Dog and cat clothing size charts in inches, plus how to measure your pet correctly before ordering.",
+    "The DOOM dog dress size chart in inches, with breed guidance and how to measure your dog correctly before ordering.",
 }
 
 export default function SizeGuidePage() {
@@ -34,18 +29,17 @@ export default function SizeGuidePage() {
             Measure before you order
           </span>
           <h1 className="mt-4 text-4xl uppercase text-white sm:text-5xl">
-            Pet clothing size guide
+            DOOM size guide
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-sm font-medium text-white/90">
-            Every measurement below is in inches and refers to the garment body,
-            not your pet&apos;s full body length.
+            Match your dog&apos;s back length, chest and neck to the chart below.
+            Every measurement is in inches and refers to the garment body.
           </p>
         </div>
       </header>
 
       <div className="space-y-12">
         <DogSizeChart />
-        <CatSizeChart />
         <MeasureGuide />
         <SizeTips />
 
